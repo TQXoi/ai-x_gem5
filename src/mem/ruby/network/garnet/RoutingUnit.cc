@@ -27,14 +27,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "mem/ruby/network/garnet/RoutingUnit.hh"
-
+// #include <iostream>
 #include "base/cast.hh"
 #include "base/compiler.hh"
 #include "debug/RubyNetwork.hh"
 #include "mem/ruby/network/garnet/InputUnit.hh"
 #include "mem/ruby/network/garnet/Router.hh"
+#include "mem/ruby/network/garnet/RoutingUnit.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
 
 namespace gem5
@@ -262,8 +261,8 @@ RoutingUnit::outportComputeXY(RouteInfo route,
     return m_outports_dirn2idx[outport_dirn];
 }
 
-#include <iostream>
-// Routing algorithm for ring: the closest direction in clockwise and counterclockwise
+// Routing algorithm for ring:
+// the closest direction in clockwise and counterclockwise
 int
 RoutingUnit::outportComputeRing(RouteInfo route,
                                  int inport,

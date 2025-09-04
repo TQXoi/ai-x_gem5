@@ -130,7 +130,6 @@ SwitchAllocator::arbitrate_inports()
 
                 // check if the flit in this InputVC is allowed to be sent
                 // send_allowed conditions described in that function.
-                // std::cout << "send_allowed" << inport << " " << outport << " " << outvc << std::endl;
                 bool make_request =
                     send_allowed(inport, invc, outport, outvc);
 
@@ -317,12 +316,6 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
         }
     } else {
         has_credit = output_unit->has_credit(outvc);
-        if (has_credit) {
-            assert(false);
-        }
-        else {
-            std::cout << "credit" << output_unit->get_credit_count(outvc) << std::endl;
-        }
     }
 
     // cannot send if no outvc or no credit.

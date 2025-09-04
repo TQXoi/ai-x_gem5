@@ -60,7 +60,6 @@ OutputUnit::OutputUnit(int id, PortDirection direction, Router *router,
         outVcState.emplace_back(i, m_router->get_net_ptr(), consumerVcs);
     }
     m_enable_wormhole = router->getWormhole();
-    // std::cout<<"output unit enable wormhole: " << m_enable_wormhole << std::endl;
     // assert(!m_enable_wormhole);
 }
 
