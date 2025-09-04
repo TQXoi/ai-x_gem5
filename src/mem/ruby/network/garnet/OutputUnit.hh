@@ -50,6 +50,9 @@ namespace ruby
 namespace garnet
 {
 
+// TQX-DEBUG
+#include <iostream>
+
 class CreditLink;
 class Router;
 
@@ -96,6 +99,13 @@ class OutputUnit : public Consumer
         return (outVcState[vc].isInState(IDLE_, curTime));
     }
 
+    // used in wormhole
+    inline bool
+    is_vc_free(int vc, Tick curTime)
+    {
+        return (outVcState[vc].isInState(IDLE_, curTime) || outVcState[vc].has_credit());
+    }
+
     void insert_flit(flit *t_flit);
 
     inline int
@@ -119,6 +129,9 @@ class OutputUnit : public Consumer
     flitBuffer outBuffer;
     // vc state of downstream router
     std::vector<OutVcState> outVcState;
+
+    // wormhole
+    bool m_enable_wormhole;
 };
 
 } // namespace garnet

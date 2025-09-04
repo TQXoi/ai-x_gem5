@@ -75,6 +75,9 @@ class GarnetNetwork : public Network
     int getNumRows() const { return m_num_rows; }
     int getNumCols() { return m_num_cols; }
 
+    bool getWormhole() const { return enable_wormhole; }
+    int getVirtualChannelDepth() const { return virtual_channel_depth; }
+
     // for network
     uint32_t getNiFlitSize() const { return m_ni_flit_size; }
     uint32_t getBuffersPerDataVC() { return m_buffers_per_data_vc; }
@@ -167,6 +170,8 @@ class GarnetNetwork : public Network
     uint32_t m_buffers_per_data_vc;
     int m_routing_algorithm;
     bool m_enable_fault_model;
+    bool enable_wormhole;
+    int virtual_channel_depth;
 
     // Statistical variables
     statistics::Vector m_packets_received;

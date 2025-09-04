@@ -90,10 +90,7 @@ class Router : public BasicRouter, public Consumer
     int get_num_outports()  { return m_output_unit.size(); }
     int get_id()            { return m_id; }
 
-    void init_net_ptr(GarnetNetwork* net_ptr)
-    {
-        m_network_ptr = net_ptr;
-    }
+    void init_net_ptr(GarnetNetwork* net_ptr);
 
     GarnetNetwork* get_net_ptr()                    { return m_network_ptr; }
 
@@ -142,6 +139,9 @@ class Router : public BasicRouter, public Consumer
     bool functionalRead(Packet *pkt, WriteMask &mask);
     uint32_t functionalWrite(Packet *);
 
+    bool getWormhole() const { return m_network_ptr->getWormhole(); }
+    int getVirtualChannelDepth() const { return m_network_ptr->getVirtualChannelDepth(); }
+
   private:
     Cycles m_latency;
     uint32_t m_virtual_networks, m_vc_per_vnet, m_num_vcs;
@@ -163,6 +163,7 @@ class Router : public BasicRouter, public Consumer
     statistics::Scalar m_sw_output_arbiter_activity;
 
     statistics::Scalar m_crossbar_activity;
+
 };
 
 } // namespace garnet

@@ -76,6 +76,12 @@ class InputUnit : public Consumer
     }
 
     inline void
+    pop_vc(int vc, Tick curTime)
+    {
+        virtualChannels[vc].popTopFlit(curTime);
+    }
+
+    inline void
     grant_outport(int vc, int outport)
     {
         virtualChannels[vc].set_outport(outport);
@@ -172,6 +178,8 @@ class InputUnit : public Consumer
     // Statistical variables
     std::vector<double> m_num_buffer_writes;
     std::vector<double> m_num_buffer_reads;
+
+    bool m_enable_wormhole;
 };
 
 } // namespace garnet

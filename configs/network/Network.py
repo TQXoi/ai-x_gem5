@@ -95,7 +95,21 @@ def define_options(parser):
         help="""routing algorithm in network.
             0: weight-based table
             1: XY (for Mesh. see garnet/RoutingUnit.cc)
-            2: Custom (see garnet/RoutingUnit.cc""",
+            2: Custom (see garnet/RoutingUnit.cc)
+            3: Ring(for ring topology, see garnet/RoutingUnit.cc)""",
+    )
+    parser.add_argument(
+        "--wormhole",
+        action="store_true",
+        default=False,
+        help="""enable wormhole flow control""",
+    )
+    parser.add_argument(
+        "--virtual-channel-depth",
+        action="store",
+        type=int,
+        default=1,
+        help="""depth of each virtual channel buffer in flits. Only used when wormhole is enabled.""",
     )
     parser.add_argument(
         "--network-fault-model",
@@ -279,3 +293,7 @@ def init_network(options, network, InterfaceClass):
         assert options.network == "garnet"
         network.enable_fault_model = True
         network.fault_model = FaultModel()
+
+    if options.wormhole:
+        network.enable_wormhole = True
+        network.virtual_channel_depth = options.virtual_channel_depth

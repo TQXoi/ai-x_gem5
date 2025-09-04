@@ -37,6 +37,9 @@
 #include "mem/ruby/network/garnet/Router.hh"
 #include "mem/ruby/network/garnet/flitBuffer.hh"
 
+// TQX-DEBUG
+#include <iostream>
+
 namespace gem5
 {
 
@@ -56,6 +59,9 @@ OutputUnit::OutputUnit(int id, PortDirection direction, Router *router,
     for (int i = 0; i < m_num_vcs; i++) {
         outVcState.emplace_back(i, m_router->get_net_ptr(), consumerVcs);
     }
+    m_enable_wormhole = router->getWormhole();
+    // std::cout<<"output unit enable wormhole: " << m_enable_wormhole << std::endl;
+    // assert(!m_enable_wormhole);
 }
 
 void
@@ -101,6 +107,8 @@ OutputUnit::has_free_vc(int vnet)
     for (int vc = vc_base; vc < vc_base + m_vc_per_vnet; vc++) {
         if (is_vc_idle(vc, curTick()))
             return true;
+        if (m_enable_wormhole && is_vc_free(vc, curTick()))
+            return true;
     }
 
     return false;
@@ -115,6 +123,14 @@ OutputUnit::select_free_vc(int vnet)
         if (is_vc_idle(vc, curTick())) {
             outVcState[vc].setState(ACTIVE_, curTick());
             return vc;
+        }
+    }
+    if (m_enable_wormhole) {
+        for (int vc = vc_base; vc < vc_base + m_vc_per_vnet; vc++) {
+            if (is_vc_free(vc, curTick())) {
+                // outVcState[vc].setState(ACTIVE_, curTick());
+                return vc;
+            }
         }
     }
 

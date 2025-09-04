@@ -55,6 +55,8 @@ SwitchAllocator::SwitchAllocator(Router *router)
 
     m_input_arbiter_activity = 0;
     m_output_arbiter_activity = 0;
+
+    m_enable_wormhole = false;
 }
 
 void
@@ -124,8 +126,11 @@ SwitchAllocator::arbitrate_inports()
                 int outport = input_unit->get_outport(invc);
                 int outvc = input_unit->get_outvc(invc);
 
+                assert(outvc == -1);
+
                 // check if the flit in this InputVC is allowed to be sent
                 // send_allowed conditions described in that function.
+                // std::cout << "send_allowed" << inport << " " << outport << " " << outvc << std::endl;
                 bool make_request =
                     send_allowed(inport, invc, outport, outvc);
 
@@ -224,12 +229,17 @@ SwitchAllocator::arbitrate_outports()
                 if ((t_flit->get_type() == TAIL_) ||
                     t_flit->get_type() == HEAD_TAIL_) {
 
-                    // This Input VC should now be empty
-                    assert(!(input_unit->isReady(invc, curTick())));
 
-                    // Free this VC
-                    input_unit->set_vc_idle(invc, curTick());
-
+                    if (m_enable_wormhole) {
+                        // In wormhole: only pop the first packet, the VC can be not empty
+                        input_unit->pop_vc(invc, curTick());
+                    }
+                    else {
+                        // This Input VC should now be empty
+                        assert(!(input_unit->isReady(invc, curTick())));
+                        // Free this VC
+                        input_unit->set_vc_idle(invc, curTick());
+                    }
                     // Send a credit back
                     // along with the information that this VC is now idle
                     input_unit->increment_credit(invc, true, curTick());
@@ -307,6 +317,12 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
         }
     } else {
         has_credit = output_unit->has_credit(outvc);
+        if (has_credit) {
+            assert(false);
+        }
+        else {
+            std::cout << "credit" << output_unit->get_credit_count(outvc) << std::endl;
+        }
     }
 
     // cannot send if no outvc or no credit.
@@ -347,6 +363,7 @@ SwitchAllocator::vc_allocate(int outport, int inport, int invc)
 
     // has to get a valid VC since it checked before performing SA
     assert(outvc != -1);
+    // Maybe a bug: outvc may change, so may be different from the top of the queue. But we make sure that only the top will be changed.
     m_router->getInputUnit(inport)->grant_outvc(invc, outvc);
     return outvc;
 }

@@ -69,6 +69,14 @@ Router::init()
 }
 
 void
+Router::init_net_ptr(GarnetNetwork* net_ptr)
+{
+    m_network_ptr = net_ptr;
+    bool enable_wormhole = net_ptr->getWormhole();
+    switchAllocator.init_wormhole(enable_wormhole);
+}
+
+void
 Router::wakeup()
 {
     DPRINTF(RubyNetwork, "Router %d woke up\n", m_id);

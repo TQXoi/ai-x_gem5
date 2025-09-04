@@ -57,6 +57,36 @@ VirtualChannel::set_idle(Tick curTime)
 }
 
 void
+VirtualChannel::popTopFlit(Tick curTime)
+{
+    flits_output.pop();
+    flits_time.pop();
+    if (!flits_output.empty()) {
+        Tick curTime = flits_time.front();
+        m_vc_state.second = curTime;
+        m_enqueue_time = curTime;
+        m_output_port = flits_output.front().first;
+        m_output_vc = flits_output.front().second;
+    }
+    else {
+        m_vc_state.first = IDLE_;
+        m_vc_state.second = curTime;
+        m_enqueue_time = Tick(INFINITE_);
+        m_output_port = -1;
+        m_output_vc = -1;
+    }
+}
+
+void
+VirtualChannel::insert_queue(Tick curTime, int outport, int outvc)
+{
+    flits_output.push(std::make_pair(outport, outvc));
+    flits_time.push(curTime);
+    // The channel shold be active
+    assert(m_vc_state.first == ACTIVE_);
+}
+
+void
 VirtualChannel::set_active(Tick curTime)
 {
     m_vc_state.first = ACTIVE_;

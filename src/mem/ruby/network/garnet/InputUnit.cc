@@ -61,6 +61,7 @@ InputUnit::InputUnit(int id, PortDirection direction, Router *router)
     for (int i=0; i < m_num_vcs; i++) {
         virtualChannels.emplace_back();
     }
+    m_enable_wormhole = router->getWormhole();
 }
 
 /*
@@ -90,18 +91,42 @@ InputUnit::wakeup()
         if ((t_flit->get_type() == HEAD_) ||
             (t_flit->get_type() == HEAD_TAIL_)) {
 
-            assert(virtualChannels[vc].get_state() == IDLE_);
-            set_vc_active(vc, curTick());
+            if (!m_enable_wormhole) {
+                assert(virtualChannels[vc].get_state() == IDLE_);
+                set_vc_active(vc, curTick());
 
-            // Route computation for this vc
-            int outport = m_router->route_compute(t_flit->get_route(),
-                m_id, m_direction);
+                // Route computation for this vc
+                int outport = m_router->route_compute(t_flit->get_route(),
+                    m_id, m_direction);
 
-            // Update output port in VC
-            // All flits in this packet will use this output port
-            // The output port field in the flit is updated after it wins SA
-            grant_outport(vc, outport);
+                // Update output port in VC
+                // All flits in this packet will use this output port
+                // The output port field in the flit is updated after it wins SA
+                grant_outport(vc, outport);
+            }
+            else {
+                if (virtualChannels[vc].get_state() == IDLE_) {
+                    set_vc_active(vc, curTick());
 
+                    // Route computation for this vc
+                    int outport = m_router->route_compute(t_flit->get_route(),
+                        m_id, m_direction);
+
+                    // Update output port in VC
+                    // All flits in this packet will use this output port
+                    // The output port field in the flit is updated after it wins SA
+                    grant_outport(vc, outport);
+                    virtualChannels[vc].insert_queue(curTick(), outport, -1);
+                }
+                else {
+                    // Route computation for this vc
+                    int outport = m_router->route_compute(t_flit->get_route(),
+                        m_id, m_direction);
+
+                    // Only add to the queue
+                    virtualChannels[vc].insert_queue(curTick(), outport, -1);
+                }
+            }
         } else {
             assert(virtualChannels[vc].get_state() == ACTIVE_);
         }

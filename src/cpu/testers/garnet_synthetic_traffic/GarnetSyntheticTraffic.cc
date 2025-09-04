@@ -185,6 +185,7 @@ GarnetSyntheticTraffic::generatePkt()
 {
     int num_destinations = numDestinations;
     int radix = (int) sqrt(num_destinations);
+
     unsigned destination = id;
     int dest_x = -1;
     int dest_y = -1;
@@ -223,6 +224,8 @@ GarnetSyntheticTraffic::generatePkt()
             dest_x = (src_x + 1) % radix;
             dest_y = src_y;
             destination = dest_y*radix + dest_x;
+    } else if (traffic == NEIGHBOR_RING_) { // Ring Topology
+            destination = (source + 1) % num_destinations;
     } else if (traffic == SHUFFLE_) {
         if (source < num_destinations/2)
             destination = source*2;
@@ -236,6 +239,9 @@ GarnetSyntheticTraffic::generatePkt()
         dest_x = (src_x + (int) ceil(radix/2) - 1) % radix;
         dest_y = src_y;
         destination = dest_y*radix + dest_x;
+    }else if (traffic == TORNADO_RING_) { // Ring Topology
+            destination = 
+                (source + (int) ceil(num_destinations/2) - 1) % num_destinations;
     }
     else {
         fatal("Unknown Traffic Type: %s!\n", traffic);
@@ -334,6 +340,8 @@ GarnetSyntheticTraffic::initTrafficType()
     trafficStringToEnum["tornado"] = TORNADO_;
     trafficStringToEnum["transpose"] = TRANSPOSE_;
     trafficStringToEnum["uniform_random"] = UNIFORM_RANDOM_;
+    trafficStringToEnum["neighbor_ring"] = NEIGHBOR_RING_;
+    trafficStringToEnum["tornado_ring"] = TORNADO_RING_;
 }
 
 void

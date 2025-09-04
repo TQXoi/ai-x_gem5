@@ -51,6 +51,9 @@ class Router;
 class InputUnit;
 class OutputUnit;
 
+// TQX-DEBUG
+#include <iostream>
+
 class SwitchAllocator : public Consumer
 {
   public:
@@ -79,6 +82,13 @@ class SwitchAllocator : public Consumer
 
     void resetStats();
 
+    void
+    init_wormhole(bool enable_wormhole)
+    {
+        m_enable_wormhole = enable_wormhole;
+        // std::cout << "sa wormhole:" << m_enable_wormhole << std::endl;
+    }
+
   private:
     int m_num_inports, m_num_outports;
     int m_num_vcs, m_vc_per_vnet;
@@ -90,6 +100,8 @@ class SwitchAllocator : public Consumer
     std::vector<int> m_round_robin_inport;
     std::vector<int> m_port_requests;
     std::vector<int> m_vc_winners;
+
+    bool m_enable_wormhole;
 };
 
 } // namespace garnet

@@ -193,6 +193,8 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
         // any custom algorithm
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
+        case RING_: outport =
+            outportComputeRing(route, inport, inport_dirn); break;
         default: outport =
             lookupRoutingTable(route.vnet, route.net_dest); break;
     }
@@ -255,6 +257,42 @@ RoutingUnit::outportComputeXY(RouteInfo route,
         // this is not possible
         // already checked that in outportCompute() function
         panic("x_hops == y_hops == 0");
+    }
+
+    return m_outports_dirn2idx[outport_dirn];
+}
+
+#include <iostream>
+// Routing algorithm for ring: the closest direction in clockwise and counterclockwise
+int
+RoutingUnit::outportComputeRing(RouteInfo route,
+                                 int inport,
+                                 PortDirection inport_dirn)
+{
+    PortDirection outport_dirn = "Unknown";
+    int num_routers = m_router->get_net_ptr()->getNumRouters();
+    assert(num_routers > 0);
+
+    int my_id = m_router->get_id();
+
+    int dest_id = route.dest_router;
+
+    assert(my_id != dest_id);
+
+    // std::cout << "num_routers " << num_routers << std::endl;
+    // std::cout << "my_id " << my_id << std::endl;
+    // std::cout << "dest_id " << dest_id << std::endl;
+    // std::cout << "inport_dirn " << inport_dirn << std::endl;
+    int clockwise_distance = (dest_id - my_id + num_routers) % num_routers;
+    int counterclockwise_distance = (my_id - dest_id + num_routers) % num_routers;
+
+    if (clockwise_distance <= counterclockwise_distance && inport_dirn != "Clockwise") {
+        assert(inport_dirn == "Local" || inport_dirn == "CounterClockwise");
+        outport_dirn = "Clockwise";
+    }
+    else{
+        assert(inport_dirn == "Local" || inport_dirn == "Clockwise");
+        outport_dirn = "CounterClockwise";
     }
 
     return m_outports_dirn2idx[outport_dirn];

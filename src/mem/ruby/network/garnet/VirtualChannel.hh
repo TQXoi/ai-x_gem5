@@ -33,6 +33,7 @@
 #define __MEM_RUBY_NETWORK_GARNET_0_VIRTUALCHANNEL_HH__
 
 #include <utility>
+#include <queue>
 
 #include "mem/ruby/network/garnet/CommonTypes.hh"
 #include "mem/ruby/network/garnet/flitBuffer.hh"
@@ -59,6 +60,8 @@ class VirtualChannel
     inline int get_outvc()                  { return m_output_vc; }
     void set_outport(int outport)           { m_output_port = outport; };
     inline int get_outport()                  { return m_output_port; }
+    void popTopFlit(Tick curTime);
+    void insert_queue(Tick curTime, int outport, int outvc);
 
     inline Tick get_enqueue_time()          { return m_enqueue_time; }
     inline void set_enqueue_time(Tick time) { m_enqueue_time = time; }
@@ -104,6 +107,9 @@ class VirtualChannel
     int m_output_port;
     Tick m_enqueue_time;
     int m_output_vc;
+
+    std::queue<std::pair<int, int> > flits_output; // output port and output vc
+    std::queue<Tick> flits_time; // enqueue_time
 };
 
 } // namespace garnet
